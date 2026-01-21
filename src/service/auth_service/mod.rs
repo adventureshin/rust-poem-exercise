@@ -4,7 +4,7 @@ pub use claims::{superuser_scope, Claims};
 
 use chrono::{Duration, Utc};
 use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
-use sqlx::SqlitePool;
+use sqlx::PgPool;
 
 use crate::common::AppError;
 use crate::db::repo::UserRepo;
@@ -57,7 +57,7 @@ impl AuthService {
     }
 
     pub async fn sign_in(
-        pool: &SqlitePool,
+        pool: &PgPool,
         credentials: Credentials,
     ) -> Result<AccessToken, AppError> {
         match UserRepo::get_user_by_username(pool, &credentials.username).await {

@@ -65,8 +65,8 @@ impl From<AppError> for GetResponseError {
 #[oai(inline)]
 pub struct PaginatedResponse<T: ParseFromJSON + ToJSON + Send + Sync> {
     pub items: Vec<T>,
-    pub offset: u32,
-    pub total: u32,
+    pub offset: i64,
+    pub total: Option<i64>,
 }
 
 #[derive(ApiResponse)]
@@ -77,7 +77,7 @@ pub enum GetListResponseSuccess<T: ParseFromJSON + ToJSON + Send + Sync> {
 }
 
 impl<T: ParseFromJSON + ToJSON + Send + Sync> GetListResponseSuccess<T> {
-    pub fn new(items: Vec<T>, offset: u32, total: u32) -> Self {
+    pub fn new(items: Vec<T>, offset: i64, total: Option<i64>) -> Self {
         let result = PaginatedResponse {
             items,
             offset,

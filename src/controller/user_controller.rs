@@ -23,8 +23,8 @@ impl UserController {
     async fn get_users_list(
         &self,
         ctx: Data<&AppContext>,
-        limit: Query<Option<u32>>,
-        offset: Query<Option<u32>>,
+        limit: Query<Option<i64>>,
+        offset: Query<Option<i64>>,
         claims: Claims,
     ) -> Result<GetListResponseSuccess<User>, GetListResponseError> {
         superuser_scope(claims)?;
@@ -38,7 +38,7 @@ impl UserController {
     async fn get_user_by_id(
         &self,
         ctx: Data<&AppContext>,
-        id: Path<i32>,
+        id: Path<i64>,
         claims: Claims,
     ) -> Result<GetResponseSuccess<User>, GetResponseError> {
         superuser_scope(claims)?;
