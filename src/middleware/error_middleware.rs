@@ -1,4 +1,7 @@
-use poem::{Endpoint, IntoResponse, Middleware, Request, Response, Result};
+use poem::{
+    http::header::CONTENT_TYPE, Body, Endpoint, IntoResponse, Middleware, Request, Response, Result,
+};
+use serde_json::json;
 
 use crate::common::AppError;
 
@@ -26,7 +29,6 @@ impl<E: Endpoint> Endpoint for ErrorMiddlewareImpl<E> {
         match resp {
             Ok(resp) => Ok(resp.into_response()),
             Err(e) => {
-                println!("ERROR: {:?}", e);
                 if e.is::<poem::error::NotFoundError>() {
                     return Ok(AppError::ResourceNotFound(uri.to_string()).into_response());
                 }
@@ -54,7 +56,7 @@ impl<E: Endpoint> Endpoint for ErrorMiddlewareImpl<E> {
                         }
                     }
                 }
-                Ok(AppError::UnhandledError(e.to_string()).into_response())
+                Ok(e.into_response())
             }
         }
     }

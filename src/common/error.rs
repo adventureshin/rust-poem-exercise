@@ -5,7 +5,6 @@ use poem::{
     Response,
 };
 use serde_json::json;
-use sqlx::Error as SqlxError;
 use thiserror::Error as ThisError;
 
 use super::format_error_message;
@@ -51,21 +50,19 @@ pub enum AppError {
     #[error("{0}")]
     UnhandledError(String),
 }
-
-impl From<SqlxError> for AppError {
-    fn from(e: SqlxError) -> Self {
+impl From<sea_orm::DbErr> for AppError {
+    fn from(e: sea_orm::DbErr) -> Self {
         match e {
-            SqlxError::PoolTimedOut => AppError::PoolTimedOut,
-            SqlxError::RowNotFound => AppError::ObjectNotFound,
-            SqlxError::Database(e) => match e.code() {
-                Some(code) => {
-                    if code == "23505" {
-                        return AppError::ObjectAlreadyExists;
-                    }
-                    AppError::DatabaseError(code.to_string())
+            sea_orm::DbErr::RecordNotFound(_) => AppError::ObjectNotFound,
+            sea_orm::DbErr::ConnectionAcquire(_) => AppError::PoolTimedOut,
+            sea_orm::DbErr::Exec(err) | sea_orm::DbErr::Query(err) => {
+                let err_str = err.to_string();
+                if err_str.contains("23505") {
+                    AppError::ObjectAlreadyExists
+                } else {
+                    AppError::DatabaseError(err_str)
                 }
-                None => AppError::InternalError,
-            },
+            }
             _ => AppError::InternalError,
         }
     }

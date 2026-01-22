@@ -18,7 +18,7 @@ impl AuthController {
         ctx: Data<&AppContext>,
         credentials: Json<Credentials>,
     ) -> Result<PostResponseSuccess<AccessToken>, PostResponseError> {
-        let token = AuthService::sign_in(&ctx.db_pool, credentials.0).await?;
+        let token = AuthService::sign_in(&ctx.db, credentials.0).await?;
         let resp = PostResponseSuccess::new(token);
         Ok(resp)
     }

@@ -2,20 +2,30 @@ use poem::{
     http::{header::AUTHORIZATION, StatusCode},
     test::{TestClient as PoemTestClient, TestRequestBuilder, TestResponse},
 };
+use sea_orm::{Database, DatabaseConnection};
 use serde_json::{json, Value as JsonValue};
-use sqlx::SqlitePool;
+
+pub async fn setup_db() -> DatabaseConnection {
+    let config = app::config::Config::from_env();
+    Database::connect(&config.database_url())
+        .await
+        .expect("Failed to connect to database")
+}
 
 pub struct TestClient {
     client: PoemTestClient<app::App>,
+    pub db: DatabaseConnection,
     token: Option<String>,
 }
 
 impl TestClient {
-    pub async fn new(pool: SqlitePool) -> TestClient {
-        let app = app::create_app(pool).await;
+    pub async fn new() -> TestClient {
+        let db = setup_db().await;
+        let app = app::create_app(db.clone()).await;
         let client = PoemTestClient::new(app);
         TestClient {
             client,
+            db,
             token: None,
         }
     }
@@ -55,21 +65,18 @@ impl TestClient {
         }
     }
 
-    pub fn get(&self, uri: &str) -> TestRequestBuilder<app::App> {
+    pub fn get(&self, uri: &str) -> TestRequestBuilder<'_, app::App> {
         let req = self.client.get(uri);
-        let req = self.add_auth_header(req);
-        req
+        self.add_auth_header(req)
     }
 
-    pub fn post(&self, uri: &str, body: &JsonValue) -> TestRequestBuilder<app::App> {
+    pub fn post(&self, uri: &str, body: &JsonValue) -> TestRequestBuilder<'_, app::App> {
         let req = self.client.post(uri).body_json(body);
-        let req = self.add_auth_header(req);
-        req
+        self.add_auth_header(req)
     }
 
-    pub fn patch(&self, uri: &str, body: &JsonValue) -> TestRequestBuilder<app::App> {
+    pub fn patch(&self, uri: &str, body: &JsonValue) -> TestRequestBuilder<'_, app::App> {
         let req = self.client.patch(uri).body_json(body);
-        let req = self.add_auth_header(req);
-        req
+        self.add_auth_header(req)
     }
 }

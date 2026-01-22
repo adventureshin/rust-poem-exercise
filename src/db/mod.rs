@@ -1,19 +1,16 @@
 pub mod repo;
 
-use sqlx::{migrate, pool::PoolOptions, PgPool};
 use std::time::Duration;
+use sea_orm::{Database, DatabaseConnection, ConnectOptions};
 use crate::config::Config;
 
-pub async fn prepare_db(config: &Config) -> PgPool {
-    let pool = PoolOptions::new()
-        .max_connections(5)
-        .acquire_timeout(Duration::from_secs(5))
-        .connect(&*config.database_url())
+pub async fn prepare_db(config: &Config) -> DatabaseConnection {
+    let mut opt = ConnectOptions::new(&config.database_url());
+    opt.max_connections(5)
+        .acquire_timeout(Duration::from_secs(5));
+
+    Database::connect(opt)
         .await
-        .expect("Failed to create database connection pool.");
-    migrate!("./migrations")
-        .run(&pool)
-        .await
-        .expect("Failed to run database migrations.");
-    pool
+        .expect("Failed to create database connection.")
 }
+

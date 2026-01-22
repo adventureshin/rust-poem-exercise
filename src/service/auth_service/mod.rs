@@ -4,7 +4,7 @@ pub use claims::{superuser_scope, Claims};
 
 use chrono::{Duration, Utc};
 use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
-use sqlx::PgPool;
+use sea_orm::DatabaseConnection;
 
 use crate::common::AppError;
 use crate::db::repo::UserRepo;
@@ -13,7 +13,7 @@ use crate::scheme::{AccessToken, Credentials};
 pub struct AuthService;
 
 impl AuthService {
-    pub fn create_access_token(user_id: i32, is_superuser: i32) -> Result<AccessToken, AppError> {
+    pub fn create_access_token(user_id: i32, is_superuser: bool) -> Result<AccessToken, AppError> {
         let iat = Utc::now();
         let exp = iat + Duration::seconds(3600);
         let iat = iat.timestamp_millis();
@@ -57,10 +57,10 @@ impl AuthService {
     }
 
     pub async fn sign_in(
-        pool: &PgPool,
+        db: &DatabaseConnection,
         credentials: Credentials,
     ) -> Result<AccessToken, AppError> {
-        match UserRepo::get_user_by_username(pool, &credentials.username).await {
+        match UserRepo::get_user_by_username(db, &credentials.username).await {
             Ok(user) => {
                 if AuthService::is_valid_password(&credentials.password, &user.password_hash) {
                     let token = AuthService::create_access_token(user.id, user.is_superuser)?;

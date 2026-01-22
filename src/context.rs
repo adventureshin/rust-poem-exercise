@@ -1,12 +1,12 @@
-use sqlx::{PgPool};
+use sea_orm::DatabaseConnection;
 
 #[derive(Clone)]
 pub struct AppContext {
-    pub db_pool: PgPool,
+    pub db: DatabaseConnection
 }
 
 impl AppContext {
-    pub fn new(db_pool: PgPool) -> Self {
-        AppContext { db_pool }
+    pub fn new(db: DatabaseConnection) -> Self {
+        AppContext { db }
     }
 }

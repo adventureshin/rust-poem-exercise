@@ -1,4 +1,4 @@
-INSERT INTO "user_table"
+INSERT INTO "users"
 (id, username, password_hash, is_superuser)
 VALUES
 -- password: "12345"

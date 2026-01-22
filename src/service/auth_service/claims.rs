@@ -11,7 +11,7 @@ use crate::common::AppError;
 #[derive(Deserialize, Serialize)]
 pub struct Claims {
     pub user_id: i32,
-    pub is_superuser: i32,
+    pub is_superuser: bool,
     pub iat: i64,
     pub exp: i64,
 }
@@ -63,7 +63,7 @@ impl<'a> ApiExtractor<'a> for Claims {
 }
 
 pub fn superuser_scope(claims: Claims) -> Result<(), AppError> {
-    if claims.is_superuser == 0 {
+    if claims.is_superuser {
         return Err(AppError::SuperuserScopeRequired);
     }
     Ok(())
