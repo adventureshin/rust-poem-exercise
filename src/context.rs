@@ -2,7 +2,7 @@ use sea_orm::DatabaseConnection;
 
 #[derive(Clone)]
 pub struct AppContext {
-    pub db: DatabaseConnection
+    pub db: DatabaseConnection,
 }
 
 impl AppContext {

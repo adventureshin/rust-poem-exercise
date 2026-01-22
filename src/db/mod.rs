@@ -1,8 +1,8 @@
 pub mod repo;
 
-use std::time::Duration;
-use sea_orm::{Database, DatabaseConnection, ConnectOptions};
 use crate::config::Config;
+use sea_orm::{ConnectOptions, Database, DatabaseConnection};
+use std::time::Duration;
 
 pub async fn prepare_db(config: &Config) -> DatabaseConnection {
     let mut opt = ConnectOptions::new(&config.database_url());
@@ -13,4 +13,3 @@ pub async fn prepare_db(config: &Config) -> DatabaseConnection {
         .await
         .expect("Failed to create database connection.")
 }
-

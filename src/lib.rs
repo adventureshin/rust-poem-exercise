@@ -3,11 +3,11 @@ pub mod config;
 pub mod context;
 pub mod controller;
 pub mod db;
+pub mod entity;
 pub mod middleware;
 pub mod response;
 pub mod scheme;
 pub mod service;
-pub mod entity;
 
 use poem::{
     middleware::{AddData, AddDataEndpoint, Cors, CorsEndpoint},

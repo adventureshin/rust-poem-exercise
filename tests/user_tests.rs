@@ -44,7 +44,6 @@ async fn create_user() {
 
     client.sign_in("admin", "12345").await;
 
-
     let new_username = format!("testuser_{}", chrono::Utc::now().timestamp());
 
     // 유저 생성

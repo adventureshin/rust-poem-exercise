@@ -1,4 +1,7 @@
-use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder, QuerySelect};
+use sea_orm::{
+    ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder,
+    QuerySelect,
+};
 
 use crate::common::AppError;
 use crate::entity::users;
@@ -40,14 +43,18 @@ impl UserRepo {
         username: &str,
     ) -> Result<User, AppError> {
         let user = users::Entity::find()
-            .filter(users::Column::Username.eq(username)).order_by_desc(users::Column::Id)
+            .filter(users::Column::Username.eq(username))
+            .order_by_desc(users::Column::Id)
             .one(db)
             .await?
             .ok_or(AppError::ObjectNotFound)?;
         Ok(User::from(user))
     }
 
-    pub async fn insert_user(db: &DatabaseConnection, insert_user: InsertUser) -> Result<User, AppError> {
+    pub async fn insert_user(
+        db: &DatabaseConnection,
+        insert_user: InsertUser,
+    ) -> Result<User, AppError> {
         let user_active = users::ActiveModel {
             id: Default::default(),
             username: sea_orm::Set(insert_user.username),
