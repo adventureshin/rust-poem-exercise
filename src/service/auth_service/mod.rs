@@ -56,22 +56,22 @@ impl AuthService {
         bcrypt::verify(pwd, pwd_hash).unwrap_or(false)
     }
 
-    pub async fn sign_in(
-        db: &DatabaseConnection,
-        credentials: Credentials,
-    ) -> Result<AccessToken, AppError> {
-        match UserRepo::get_user_by_username(db, &credentials.username).await {
-            Ok(user) => {
-                if AuthService::is_valid_password(&credentials.password, &user.password_hash) {
-                    let token = AuthService::create_access_token(user.id, user.is_superuser)?;
-                    return Ok(token);
-                }
-                Err(AppError::InvalidCredentials)
-            }
-            Err(e) => match e {
-                AppError::ObjectNotFound => Err(AppError::InvalidCredentials),
-                _ => Err(e),
-            },
-        }
-    }
+    // pub async fn sign_in(
+    //     db: &DatabaseConnection,
+    //     credentials: Credentials,
+    // ) -> Result<AccessToken, AppError> {
+    //     match UserRepo::get_user_by_username(db, &credentials.username).await {
+    //         Ok(user) => {
+    //             if AuthService::is_valid_password(&credentials.password, &user.password_hash) {
+    //                 let token = AuthService::create_access_token(user.id, user.is_superuser)?;
+    //                 return Ok(token);
+    //             }
+    //             Err(AppError::InvalidCredentials)
+    //         }
+    //         Err(e) => match e {
+    //             AppError::ObjectNotFound => Err(AppError::InvalidCredentials),
+    //             _ => Err(e),
+    //         },
+    //     }
+    // }
 }

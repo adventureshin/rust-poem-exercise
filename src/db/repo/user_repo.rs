@@ -43,7 +43,7 @@ impl UserRepo {
         username: &str,
     ) -> Result<User, AppError> {
         let user = users::Entity::find()
-            .filter(users::Column::Username.eq(username))
+            .filter(users::Column::Name.eq(username))
             .order_by_desc(users::Column::Id)
             .one(db)
             .await?
@@ -51,17 +51,16 @@ impl UserRepo {
         Ok(User::from(user))
     }
 
-    pub async fn insert_user(
+    pub async fn get_user_by_google_id(
         db: &DatabaseConnection,
-        insert_user: InsertUser,
+        google_id: &str,
     ) -> Result<User, AppError> {
-        let user_active = users::ActiveModel {
-            id: Default::default(),
-            username: sea_orm::Set(insert_user.username),
-            password_hash: sea_orm::Set(insert_user.password_hash),
-            is_super_user: sea_orm::Set(insert_user.is_superuser),
-        };
-        let user = user_active.insert(db).await?;
+        let user = users::Entity::find()
+            .filter(users::Column::GoogleId.eq(google_id))
+            .order_by_desc(users::Column::Id)
+            .one(db)
+            .await?
+            .ok_or(AppError::ObjectNotFound)?;
         Ok(User::from(user))
     }
 }

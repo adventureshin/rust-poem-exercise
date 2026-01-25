@@ -12,8 +12,10 @@ impl MigrationTrait for Migration {
                     .table(Users::Table)
                     .if_not_exists()
                     .col(pk_auto(Users::Id))
-                    .col(string(Users::Username))
-                    .col(string(Users::PasswordHash))
+                    .col(string(Users::Name))
+                    .col(string(Users::GoogleId))
+                    .col(string(Users::Email).unique_key())
+                    .col(string_null(Users::ProfileUrl))
                     .col(boolean(Users::IsSuperUser))
                     .to_owned(),
             )
@@ -31,7 +33,9 @@ impl MigrationTrait for Migration {
 enum Users {
     Table,
     Id,
-    Username,
-    PasswordHash,
+    Name,
+    GoogleId,
+    Email,
+    ProfileUrl,
     IsSuperUser
 }

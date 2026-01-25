@@ -46,21 +46,4 @@ impl UserController {
         let resp = GetResponseSuccess::new(user);
         Ok(resp)
     }
-
-    /// Create new user.
-    #[oai(path = "/", method = "post")]
-    async fn create_user(
-        &self,
-        ctx: Data<&AppContext>,
-        user: Json<CreateUser>,
-    ) -> Result<PostResponseSuccess<User>, PostResponseError> {
-        let insert_user = InsertUser {
-            username: user.0.username,
-            password_hash: AuthService::hash_password(&user.0.password)?,
-            is_superuser: false,
-        };
-        let user = UserRepo::insert_user(&ctx.db, insert_user).await?;
-        let resp = PostResponseSuccess::new(user);
-        Ok(resp)
-    }
 }
