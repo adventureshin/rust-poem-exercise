@@ -49,20 +49,32 @@ impl AuthController {
                 PostResponseError::from(err)
             })?;
 
-        let user = UserRepo::insert_user(
-            &ctx.db,
-            InsertUser {
-                name: google_user.email.clone(),
-                email: google_user.email,
-                google_id: google_user.id,
-                is_super_user: false,
-                profile_url: google_user.picture,
-            },
-        ).await?;
-        Ok(PostResponseSuccess::new(AuthService::create_login_response(
-            &ctx.db,
-            user.id,
-            user.is_super_user,
-        ).await?))
+        match UserRepo::get_user_by_google_id(&ctx.db, &google_user.id).await {
+            Ok(user) => {
+                // 기존 사용자 로그인
+                Ok(PostResponseSuccess::new(AuthService::create_login_response(
+                    &ctx.db,
+                    user.id,
+                    user.is_super_user,
+                ).await?))
+            }
+            Err(_) => {
+                let new_user = UserRepo::insert_user(
+                    &ctx.db,
+                    InsertUser {
+                        name: google_user.email.clone(),
+                        email: google_user.email,
+                        google_id: google_user.id,
+                        is_super_user: false,
+                        profile_url: google_user.picture,
+                    },
+                ).await?;
+                Ok(PostResponseSuccess::new(AuthService::create_login_response(
+                    &ctx.db,
+                    new_user.id,
+                    new_user.is_super_user,
+                ).await?))
+            }
+        }
     }
 }
