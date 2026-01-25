@@ -16,7 +16,7 @@ pub struct User {
     /// profile url
     pub profile_url: Option<String>,
     /// Flag indicating the user is superuser or not.
-    pub is_superuser: bool,
+    pub is_super_user: bool,
 }
 
 /// Create user scheme.
@@ -27,12 +27,15 @@ pub struct CreateUser {
     pub google_id: String,
     pub email: String,
     pub profile_url: Option<String>,
-    pub is_superuser: bool,
+    pub is_super_user: bool,
 }
 
 pub struct InsertUser {
-    pub username: String,
-    pub is_superuser: bool,
+    pub name: String,
+    pub google_id: String,
+    pub email: String,
+    pub profile_url: Option<String>,
+    pub is_super_user: bool,
 }
 
 fn user_example() -> User {
@@ -42,7 +45,7 @@ fn user_example() -> User {
         google_id: "google_id".to_string(),
         email: "test@gmail.com".to_string(),
         profile_url: Some("http://example.com/profile".to_string()),
-        is_superuser: true,
+        is_super_user: true,
     }
 }
 
@@ -52,7 +55,7 @@ fn create_user_example() -> CreateUser {
         google_id: "google_id_2".to_string(),
         email: "testtest@gmail.com".to_string(),
         profile_url: Some("http://example.com/profile2".to_string()),
-        is_superuser: false,
+        is_super_user: false,
     }
 }
 
@@ -64,7 +67,7 @@ impl From<crate::entity::users::Model> for User {
             google_id: model.google_id,
             email: model.email,
             profile_url: model.profile_url,
-            is_superuser: model.is_super_user,
+            is_super_user: model.is_super_user,
         }
     }
 }

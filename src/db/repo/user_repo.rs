@@ -63,4 +63,17 @@ impl UserRepo {
             .ok_or(AppError::ObjectNotFound)?;
         Ok(User::from(user))
     }
+
+    pub async fn insert_user(db: &DatabaseConnection, new_user: InsertUser) -> Result<User, AppError> {
+        let user_active_model = users::ActiveModel {
+            name: sea_orm::Set(new_user.name),
+            google_id: sea_orm::Set(new_user.google_id),
+            email: sea_orm::Set(new_user.email),
+            profile_url: sea_orm::Set(new_user.profile_url),
+            is_super_user: sea_orm::Set(new_user.is_super_user),
+            ..Default::default()
+        };
+        let inserted_user = user_active_model.insert(db).await?;
+        Ok(User::from(inserted_user))
+    }
 }

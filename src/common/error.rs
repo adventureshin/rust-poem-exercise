@@ -29,6 +29,12 @@ pub enum AppError {
     MissingAccessToken,
     #[error("Access token expired.")]
     AccessTokenExpired,
+    #[error("Invalid refresh token.")]
+    InvalidRefreshToken,
+    #[error("Missing refresh token.")]
+    MissingRefreshToken,
+    #[error("Refresh token expired.")]
+    RefreshTokenExpired,
     #[error("Invalid credentials.")]
     InvalidCredentials,
     #[error("Superuser scope required.")]
@@ -94,6 +100,9 @@ impl ResponseError for AppError {
             | AppError::MissingAccessToken
             | AppError::AccessTokenExpired
             | AppError::InvalidCredentials
+            | AppError::InvalidRefreshToken
+            | AppError::MissingRefreshToken
+            | AppError::RefreshTokenExpired
             | AppError::SuperuserScopeRequired => StatusCode::UNAUTHORIZED,
             // 404
             AppError::ObjectNotFound | AppError::ResourceNotFound(_) => StatusCode::NOT_FOUND,

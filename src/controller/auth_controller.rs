@@ -3,8 +3,9 @@ use poem_openapi::{payload::Json, param::Query, ApiResponse, OpenApi};
 
 use super::Tag;
 use crate::context::AppContext;
+use crate::db::repo::UserRepo;
 use crate::response::{PostResponseError, PostResponseSuccess};
-use crate::scheme::{AccessToken, Credentials};
+use crate::scheme::{AccessToken, InsertUser, LoginResponse};
 use crate::service::auth_service::AuthService;
 use crate::service::google_auth_service::{GoogleAuthService, GoogleUserInfo};
 
@@ -31,7 +32,7 @@ impl AuthController {
         &self,
         ctx: Data<&AppContext>,
         code: Query<String>,
-    ) -> Result<PostResponseSuccess<GoogleUserInfo>, PostResponseError> {
+    ) -> Result<PostResponseSuccess<LoginResponse>, PostResponseError> {
         // 1. code로 access_token 교환
         let token_response = GoogleAuthService::exchange_code_for_token(&ctx.config, &code.0)
             .await
@@ -48,7 +49,20 @@ impl AuthController {
                 PostResponseError::from(err)
             })?;
 
-        // 3. 사용자 정보 반환 (DB 저장은 호출측에서 처리)
-        Ok(PostResponseSuccess::new(google_user))
+        let user = UserRepo::insert_user(
+            &ctx.db,
+            InsertUser {
+                name: google_user.email.clone(),
+                email: google_user.email,
+                google_id: google_user.id,
+                is_super_user: false,
+                profile_url: google_user.picture,
+            },
+        ).await?;
+        Ok(PostResponseSuccess::new(AuthService::create_login_response(
+            &ctx.db,
+            user.id,
+            user.is_super_user,
+        ).await?))
     }
 }
