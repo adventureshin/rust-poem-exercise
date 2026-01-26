@@ -46,7 +46,6 @@ impl Mutation {
     ) -> Result<Chef, async_graphql::Error> {
         let db = ctx.data::<DatabaseConnection>()
             .map_err(|e| async_graphql::Error::new(e.message))?;
-        let db = ctx.data::<DatabaseConnection>()?;
         let chef = ChefRepo::insert_chef(
             db,
             name,

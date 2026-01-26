@@ -60,14 +60,18 @@ cargo install cargo-watch
 
 ### 2. 환경 변수 설정
 
-프로젝트 루트에 `.env` 파일을 생성합니다:
+프로젝트 루트에 `.env` 파일을 생성합니다 (GOOGLE_REDIRECT_URL은 클라이언트 설정에 맞게 변경):
 
 ```env
+SERVER_PORT=8000
 DATABASE_SERVER=localhost
 DATABASE_USER=your_user
 DATABASE_PASSWORD=your_password
 DATABASE_DB=your_database
-DATABASE_PORT=3000
+DATABASE_PORT=5432
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_REDIRECT_URL=http://localhost:3000/auth/callback
 ```
 
 ### 3. 스크립트 실행 권한 부여
@@ -125,13 +129,17 @@ cargo watch -x run
 cargo build --release
 ```
 
-## API 문서
+## API 문서 및 GraphQL
 
-서버 실행 후 Swagger UI에서 API 문서를 확인할 수 있습니다:
+서버 실행 후 다음 엔드포인트에서 API를 확인할 수 있습니다:
 
-```
-http://localhost:3000/
-```
+| 엔드포인트 | 설명 |
+|------------|------|
+| `http://localhost:{SERVER_PORT}/docs` | Swagger UI (REST API 문서) |
+| `http://localhost:{SERVER_PORT}/graphql` | GraphiQL (GraphQL Playground) |
+| `http://localhost:{SERVER_PORT}/api/*` | REST API 엔드포인트 |
+
+기본 포트는 `8000`이며, `.env`의 `SERVER_PORT`로 변경 가능합니다.
 
 ## 주요 의존성
 
@@ -139,9 +147,12 @@ http://localhost:3000/
 |--------|------|
 | poem | 웹 프레임워크 |
 | poem-openapi | OpenAPI/Swagger 지원 |
+| async-graphql | GraphQL 서버 |
+| async-graphql-poem | GraphQL + Poem 통합 |
 | sea-orm | ORM |
 | sea-orm-migration | 마이그레이션 |
 | tokio | 비동기 런타임 |
 | serde | 직렬화/역직렬화 |
 | jsonwebtoken | JWT 인증 |
 | bcrypt | 비밀번호 해싱 |
+| reqwest | HTTP 클라이언트 (Google OAuth) |
