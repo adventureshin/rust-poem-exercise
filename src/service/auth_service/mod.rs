@@ -14,6 +14,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Deserialize, Serialize)]
 pub struct RefreshClaims {
     pub user_id: i32,
+    pub is_super_user: bool,
     pub is_refresh: bool,
     pub iat: i64,
     pub exp: i64,
@@ -45,16 +46,16 @@ impl AuthService {
     }
 
     pub async fn create_refresh_token(
-        db: &DatabaseConnection,
         user_id: i32,
+        is_super_user: bool,
     ) -> Result<String, AppError> {
-        let user = UserRepo::get_user_by_id(db, user_id).await?;
         let iat = Utc::now();
         let exp = iat + Duration::days(7);
         let iat = iat.timestamp_millis();
         let exp = exp.timestamp_millis();
         let claims = RefreshClaims {
-            user_id: user.id,
+            user_id,
+            is_super_user,
             is_refresh: true,
             iat,
             exp,
@@ -90,16 +91,25 @@ impl AuthService {
     }
 
     pub async fn create_login_response(
-        db: &DatabaseConnection,
         user_id: i32,
         is_super_user: bool,
     ) -> Result<LoginResponse, AppError> {
         let access_token = AuthService::create_access_token(user_id, is_super_user)?;
-        let refresh_token = AuthService::create_refresh_token(db, user_id).await?;
+        let refresh_token = AuthService::create_refresh_token(user_id, is_super_user).await?;
         Ok(LoginResponse {
             access_token,
             refresh_token,
         })
+    }
+
+    pub fn refresh_access_token(
+        refresh_token: &str,
+    ) -> Result<AccessToken, AppError> {
+        let claims = AuthService::verify_refresh_token(refresh_token)?;
+        if !claims.is_refresh {
+            return Err(AppError::InvalidRefreshToken);
+        }
+        AuthService::create_access_token(claims.user_id, claims.is_super_user)
     }
 
     pub fn hash_password(pwd: &str) -> Result<String, AppError> {

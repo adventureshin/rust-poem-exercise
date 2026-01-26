@@ -1,5 +1,5 @@
 use poem::web::Data;
-use poem_openapi::{payload::Json, param::Query, ApiResponse, OpenApi};
+use poem_openapi::{param::Query, payload::Json, ApiResponse, OpenApi};
 
 use super::Tag;
 use crate::context::AppContext;
@@ -52,11 +52,9 @@ impl AuthController {
         match UserRepo::get_user_by_google_id(&ctx.db, &google_user.id).await {
             Ok(user) => {
                 // 기존 사용자 로그인
-                Ok(PostResponseSuccess::new(AuthService::create_login_response(
-                    &ctx.db,
-                    user.id,
-                    user.is_super_user,
-                ).await?))
+                Ok(PostResponseSuccess::new(
+                    AuthService::create_login_response(user.id, user.is_super_user).await?,
+                ))
             }
             Err(_) => {
                 let new_user = UserRepo::insert_user(
@@ -68,13 +66,23 @@ impl AuthController {
                         is_super_user: false,
                         profile_url: google_user.picture,
                     },
-                ).await?;
-                Ok(PostResponseSuccess::new(AuthService::create_login_response(
-                    &ctx.db,
-                    new_user.id,
-                    new_user.is_super_user,
-                ).await?))
+                )
+                .await?;
+                Ok(PostResponseSuccess::new(
+                    AuthService::create_login_response(new_user.id, new_user.is_super_user).await?,
+                ))
             }
         }
+    }
+
+    /// Refresh access token using refresh token.
+    #[oai(path = "/refresh", method = "post")]
+    async fn refresh_access_token(
+        &self,
+        ctx: Data<&AppContext>,
+        refresh_token: Json<String>,
+    ) -> Result<PostResponseSuccess<AccessToken>, PostResponseError> {
+        let access_token = AuthService::refresh_access_token(&refresh_token.0)?;
+        Ok(PostResponseSuccess::new(access_token))
     }
 }

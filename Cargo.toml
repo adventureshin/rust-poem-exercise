@@ -10,6 +10,8 @@ path = "src/lib.rs"
 doctest = false
 
 [dependencies]
+async-graphql = "5"
+async-graphql-poem = "5"
 bcrypt = "0.12.1"
 chrono = "0.4.19"
 dotenvy = "0.15.7"

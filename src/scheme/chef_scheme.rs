@@ -1,8 +1,9 @@
 use poem_openapi::Object;
+use async_graphql::{SimpleObject, Enum};
 use crate::entity;
 
 /// Chef scheme.
-#[derive(Object)]
+#[derive(Object, SimpleObject)]
 #[oai(example = "chef_example")]
 pub struct Chef {
     pub id: i32,
@@ -16,7 +17,7 @@ pub struct Chef {
 }
 
 
-#[derive(poem_openapi::Enum)]
+#[derive(poem_openapi::Enum, Enum, Copy, Clone, Eq, PartialEq)]
 pub enum Source {
     White,
     Black,
